@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "main": "src/server.js",
   "scripts": {
-    "dev": "nodemon src/server.js",
-    "start": "node src/server.js"
+    "dev": "set NODE_OPTIONS=--import ./instrument.mjs && nodemon src/server.js",
+    "start": "set NODE_OPTIONS=--import ./instrument.mjs && node src/server.js"
   },
   "keywords": [],
   "type": "module",
@@ -18,7 +18,8 @@
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "inngest": "^3.44.3",
-    "mongoose": "^8.19.1"
+    "mongoose": "^8.19.1",
+    "stream-chat": "^9.24.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"
