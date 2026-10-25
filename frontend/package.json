@@ -12,9 +12,13 @@
   "dependencies": {
     "@clerk/clerk-react": "^5.53.2",
     "axios": "^1.12.2",
+    "lucide-react": "^1.61.0",
     "react": "^19.1.1",
     "react-dom": "^19.1.1",
-    "react-router": "^7.9.4"
+    "react-hot-toast": "^2.6.1",
+    "react-router": "^7.9.4",
+    "stream-chat": "^9.54.0",
+    "stream-chat-react": "^13.14.6"
   },
   "devDependencies": {
     "@eslint/js": "^9.36.0",

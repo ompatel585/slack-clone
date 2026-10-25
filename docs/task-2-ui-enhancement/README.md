@@ -2,7 +2,7 @@
 
 > **Branch:** `feat/ui-enhancement` (cut from `main` after the Task 1 PR is merged)
 > **Goal:** replace the placeholder "Home Page" with a polished, responsive Slack-style workspace, and give the whole app one consistent design system.
-> **Status:** ⏳ Not started
+> **Status:** ✅ Complete — Phase 1 ✅ · Phase 2 ✅ · Phase 3 ✅ · Phase 4 ✅
 
 ---
 
@@ -25,10 +25,10 @@ Legend: **A** = added, **M** = modified, **D** = deleted.
 
 | Phase | Scope | Files | Status |
 |------:|-------|------:|--------|
-| 1 | Design system & app shell foundation | 8 | ⏳ |
-| 2 | Auth (landing) page redesign | 3 | ⏳ |
-| 3 | Chat workspace: sidebar, channel list, chat window, threads | 13 | ⏳ |
-| 4 | Responsive layout, error handling & polish | 7 | ⏳ |
+| 1 | Design system & app shell foundation | 8 | ✅ |
+| 2 | Auth (landing) page redesign | 3 | ✅ |
+| 3 | Chat workspace: sidebar, channel list, chat window, threads | 13 | ✅ |
+| 4 | Responsive layout, error handling & polish | 7 | ✅ |
 
 ---
 
@@ -52,7 +52,18 @@ Legend: **A** = added, **M** = modified, **D** = deleted.
 | A | `frontend/src/components/PageLoader.jsx` |
 | M | `docs/task-2-ui-enhancement/README.md` |
 
-**Phase summary:** _pending_
+**Phase summary:** ✅ Done
+- `index.css` holds the full token set:
+  - brand, neutral, sidebar and status colours;
+  - a type scale, a 4 px spacing scale, radii and shadows;
+  - focus ring, motion, z-index layers and layout sizes.
+- It also has a modern reset, thin scrollbars, `:focus-visible` rings, `.sr-only`, `.spinner`, page-loader styles and a global `prefers-reduced-motion` override.
+- `index.html` preconnects to and loads Inter (400–800) and adds a meta description and `theme-color`.
+- `PageLoader` is a branded, screen-reader-announced (`role="status"`) loader. `App.jsx` shows it until Clerk reports `isLoaded`, which ends the blank flash.
+- `main.jsx` passes Clerk `appearance` variables (brand purple, Inter, 0.75 rem radius) and mounts a global themed `<Toaster />`.
+- Dependencies: `lucide-react@^1.61.0` and `react-hot-toast@^2.6.1` (both support React 19).
+- Verified: lint is clean, the build succeeds, and the loader renders correctly in the dev server's browser preview.
+- File changes: 1 added, 7 modified (8), exactly as planned.
 
 ---
 
@@ -68,7 +79,23 @@ Legend: **A** = added, **M** = modified, **D** = deleted.
 | M | `frontend/src/styles/auth.css` |
 | M | `docs/task-2-ui-enhancement/README.md` |
 
-**Phase summary:** _pending_
+**Phase summary:** ✅ Done
+- `AuthPage.jsx`:
+  - semantic markup: `<main>`, two `<section>`s with the illustration side `aria-hidden`, and `<ul>` lists;
+  - a "Real-time team chat" eyebrow and a gradient-accented headline;
+  - features rendered from data with lucide icons and descriptions;
+  - a primary **Get started** (`SignUpButton`) plus a secondary **I already have an account** (`SignInButton`);
+  - a trust row;
+  - two decorative "live" cards floating over the illustration.
+- Wording change from the plan: the trust row says **"Encrypted in transit"**, not "end-to-end encryption". Stream Chat isn't E2E-encrypted, so the original wording would have been a false security claim.
+- `auth.css`:
+  - uses design tokens throughout;
+  - fluid `clamp()` headline that no longer overflows on small screens;
+  - visible `:focus-visible` ring on both CTAs and an entrance animation;
+  - breakpoints at 1100, 900 and 480 px (stacked layout, full-width CTAs, decorative cards hidden on phones);
+  - the illustration is lazy-loaded; global reduced-motion rules stop the float animations.
+- Verified in the browser preview with a Clerk mock at 1280 × 860 and at 375 × 812. There is no horizontal overflow at 375 px. Lint is clean and the build succeeds.
+- File changes: 0 added, 3 modified (3), exactly as planned.
 
 ---
 
@@ -101,7 +128,26 @@ Legend: **A** = added, **M** = modified, **D** = deleted.
 | A | `frontend/src/styles/stream-chat-theme.css` |
 | M | `docs/task-2-ui-enhancement/README.md` |
 
-**Phase summary:** _pending_
+**Phase summary:** ✅ Done
+- Dependencies: `stream-chat@^9.54.0` and `stream-chat-react@^13.14.6`. v13 is pinned on purpose, because v14 changed its component APIs. npm warns that the nested `react-image-gallery` peer range stops at React 18; `stream-chat-react` 13 itself supports React 19.
+- `lib/axios.js`: an axios instance on `VITE_API_URL` with a 15 s timeout. An interceptor attaches Clerk's session JWT as a `Bearer` token, because the cross-origin API never receives Clerk's cookie.
+- `lib/api.js`: the `getStreamToken()` helper.
+- `useStreamChat`:
+  - each effect run owns its own `StreamChat` instance with a `cancelled` guard, so StrictMode's double mount can't disconnect the live client;
+  - name and avatar are read through a ref, so profile edits don't force a reconnect;
+  - returns `{ chatClient, isLoading, error, retry }`.
+- `HomePage`: a `Chat` → `Sidebar` + `Channel` (`Window` with the custom header, `MessageList`, auto-focused `MessageInput`, plus `Thread`). A "Pick a conversation" `EmptyState` shows when no channel is selected.
+- `Sidebar`: brand header with Clerk `UserButton`, a "Channels" section with a `ChannelList` (the user's `messaging` channels sorted by latest message, presence on, first channel auto-selected), an empty-list hint, and a footer card for the current user.
+- `CustomChannelPreview`: `#` or 🔒 icon, ellipsized name, active and unread styles, a red badge capped at 99+, and `aria-current`. The unread count is announced through `.sr-only` text.
+- `CustomChannelHeader`: name, description, member count, an "N online" watcher pill, and an empty actions slot for Task 3.
+- `stream-chat-theme.css` re-maps Stream's v2 variables to the brand tokens (purple own-message bubbles, Inter, rounder radii), plus a card-style composer with a focus ring and a bordered thread panel. `workspace.css` holds the layout, sidebar, preview rows, header, empty state and shared `.btn` / `.icon-btn` styles.
+- Verified with an offline mock Stream client seeded with 5 channels (preview only, never committed) at 1366 × 800:
+  - the sidebar, active and unread states and the private-channel icon render;
+  - the header stats render, and own and other messages are styled correctly;
+  - switching channels updates the active row, header and messages.
+- One fix came out of the preview: the unread badge's `aria-label` on a `<span>` isn't announced, so the count moved to visually hidden text.
+- Lint is clean and the build succeeds. Vite warns that the chunk is over 500 kB (the Stream SDK); route-level code splitting is planned in Task 3 Phase 3, which already touches `App.jsx`.
+- File changes: 9 added, 4 modified (13), exactly as planned.
 
 ---
 
@@ -122,7 +168,27 @@ Legend: **A** = added, **M** = modified, **D** = deleted.
 | M | `frontend/src/styles/workspace.css` |
 | M | `docs/task-2-ui-enhancement/README.md` |
 
-**Phase summary:** _pending_
+**Phase summary:** ✅ Done
+- Mobile (≤ 768 px):
+  - the sidebar becomes an off-canvas drawer (`min(85vw, 300px)`) with a dimmed backdrop;
+  - it opens from a ☰ button in the channel header, which has `aria-controls`;
+  - it closes on the ✕ button, a backdrop tap, Escape, or picking a channel;
+  - a closed drawer is `visibility: hidden`, so it's out of the tab order;
+  - the header hides the description and the "online" label, and threads open full-screen;
+  - the "Pick a conversation" empty state gets a **Browse channels** button.
+- Tablet (≤ 1024 px): a narrower 248 px sidebar.
+- New `ErrorBoundary` wraps the whole app in `main.jsx`. Any render crash shows a branded "Something went wrong" screen with **Reload Slap** instead of a white page.
+- A Stream or token failure shows "Couldn't connect to your workspace" with a context-aware message (session expired, server unreachable or generic), plus **Try again** (`retry()` from the hook) and **Sign out**.
+- The channel list shows shimmering skeleton rows while it loads.
+- Verified in the browser preview:
+  - 375 × 812: drawer open → pick `#engineering` (switches and closes) → reopen → Escape closes; the backdrop is removed each time; the connection-error screen renders.
+  - 1280 × 800: the mobile-only controls are `display: none` and the sidebar is static.
+- Lint is clean and the build succeeds.
+- File changes: 1 added, 6 modified (7), exactly as planned.
+
+### Task 2 — final verification
+- Every phase was checked with lint, a production build and the browser preview. The workspace preview used an offline mock Stream client and a Clerk stub, which live in an untracked `.preview/` folder and were never committed.
+- **Not covered:** a live end-to-end session against real Clerk and Stream, because no keys are configured in this environment.
 
 ---
 
