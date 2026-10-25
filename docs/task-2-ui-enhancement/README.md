@@ -2,7 +2,7 @@
 
 > **Branch:** `feat/ui-enhancement` (cut from `main` after the Task 1 PR is merged)
 > **Goal:** replace the placeholder "Home Page" with a polished, responsive Slack-style workspace, and give the whole app one consistent design system.
-> **Status:** 🚧 In progress — Phase 1 ✅ · Phase 2 ✅ · Phase 3 ✅
+> **Status:** ✅ Complete — Phase 1 ✅ · Phase 2 ✅ · Phase 3 ✅ · Phase 4 ✅
 
 ---
 
@@ -28,7 +28,7 @@ Legend: **A** = added, **M** = modified, **D** = deleted.
 | 1 | Design system & app shell foundation | 8 | ✅ |
 | 2 | Auth (landing) page redesign | 3 | ✅ |
 | 3 | Chat workspace: sidebar, channel list, chat window, threads | 13 | ✅ |
-| 4 | Responsive layout, error handling & polish | 7 | ⏳ |
+| 4 | Responsive layout, error handling & polish | 7 | ✅ |
 
 ---
 
@@ -168,7 +168,27 @@ Legend: **A** = added, **M** = modified, **D** = deleted.
 | M | `frontend/src/styles/workspace.css` |
 | M | `docs/task-2-ui-enhancement/README.md` |
 
-**Phase summary:** _pending_
+**Phase summary:** ✅ Done
+- Mobile (≤ 768 px):
+  - the sidebar becomes an off-canvas drawer (`min(85vw, 300px)`) with a dimmed backdrop;
+  - it opens from a ☰ button in the channel header, which has `aria-controls`;
+  - it closes on the ✕ button, a backdrop tap, Escape, or picking a channel;
+  - a closed drawer is `visibility: hidden`, so it's out of the tab order;
+  - the header hides the description and the "online" label, and threads open full-screen;
+  - the "Pick a conversation" empty state gets a **Browse channels** button.
+- Tablet (≤ 1024 px): a narrower 248 px sidebar.
+- New `ErrorBoundary` wraps the whole app in `main.jsx`. Any render crash shows a branded "Something went wrong" screen with **Reload Slap** instead of a white page.
+- A Stream or token failure shows "Couldn't connect to your workspace" with a context-aware message (session expired, server unreachable or generic), plus **Try again** (`retry()` from the hook) and **Sign out**.
+- The channel list shows shimmering skeleton rows while it loads.
+- Verified in the browser preview:
+  - 375 × 812: drawer open → pick `#engineering` (switches and closes) → reopen → Escape closes; the backdrop is removed each time; the connection-error screen renders.
+  - 1280 × 800: the mobile-only controls are `display: none` and the sidebar is static.
+- Lint is clean and the build succeeds.
+- File changes: 1 added, 6 modified (7), exactly as planned.
+
+### Task 2 — final verification
+- Every phase was checked with lint, a production build and the browser preview. The workspace preview used an offline mock Stream client and a Clerk stub, which live in an untracked `.preview/` folder and were never committed.
+- **Not covered:** a live end-to-end session against real Clerk and Stream, because no keys are configured in this environment.
 
 ---
 

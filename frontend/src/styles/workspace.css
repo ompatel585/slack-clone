@@ -390,3 +390,182 @@
   color: var(--text);
   background: var(--surface-sunken);
 }
+
+/* ==========================================================================
+   Loading skeleton
+   ========================================================================== */
+.sidebar__skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-3);
+}
+
+.skeleton-row {
+  display: block;
+  height: 0.875rem;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.06) 0%,
+    rgba(255, 255, 255, 0.16) 50%,
+    rgba(255, 255, 255, 0.06) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 200% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* ==========================================================================
+   Full-screen error (connection failure + error boundary)
+   ========================================================================== */
+.error-screen {
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  background: radial-gradient(ellipse at top, #2a1145 0%, var(--brand-900) 60%);
+}
+
+.error-screen .empty-state__icon {
+  color: #fecdd3;
+  background: rgba(224, 30, 90, 0.18);
+}
+
+.error-screen__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-3);
+}
+
+.empty-state--dark .btn--ghost {
+  color: var(--text-inverse);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+
+.empty-state--dark .btn--ghost:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* ==========================================================================
+   Header / sidebar controls that only exist on small screens
+   ========================================================================== */
+.sidebar__header-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.sidebar__close,
+.channel-header__menu,
+.workspace__browse,
+.sidebar-backdrop {
+  display: none;
+}
+
+.sidebar__close {
+  color: var(--sidebar-text);
+}
+
+.sidebar__close:hover {
+  color: var(--sidebar-text-strong);
+  background: var(--sidebar-hover);
+}
+
+/* ==========================================================================
+   Responsive
+   ========================================================================== */
+@media (max-width: 1024px) {
+  :root {
+    --sidebar-width: 248px;
+  }
+
+  .channel-header__description {
+    max-width: 36ch;
+  }
+}
+
+@media (max-width: 768px) {
+  /* Sidebar becomes an off-canvas drawer */
+  .sidebar {
+    position: fixed;
+    inset: 0 auto 0 0;
+    z-index: var(--z-drawer);
+    width: min(85vw, 300px);
+    transform: translateX(-100%);
+    visibility: hidden; /* keeps the closed drawer out of the tab order */
+    transition: transform var(--duration-slow) var(--ease-out),
+      visibility 0s linear var(--duration-slow);
+  }
+
+  .sidebar.is-open {
+    transform: translateX(0);
+    visibility: visible;
+    box-shadow: var(--shadow-lg);
+    transition: transform var(--duration-slow) var(--ease-out), visibility 0s;
+  }
+
+  .sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: calc(var(--z-drawer) - 1);
+    background: rgba(18, 7, 31, 0.55);
+    animation: fade-in var(--duration-base) var(--ease-out);
+  }
+
+  .sidebar__close,
+  .channel-header__menu,
+  .workspace__browse {
+    display: inline-flex;
+  }
+
+  .channel-header {
+    gap: var(--space-2);
+    padding: 0 var(--space-3);
+  }
+
+  .channel-header__info {
+    flex: 1;
+  }
+
+  .channel-header__description,
+  .channel-header__stat-label {
+    display: none;
+  }
+
+  .str-chat__message-input {
+    padding: var(--space-2) var(--space-3) var(--space-3);
+  }
+
+  /* Threads take over the screen instead of squeezing the conversation */
+  .workspace__main .str-chat__channel {
+    position: relative;
+  }
+
+  .workspace__main .str-chat__thread {
+    position: absolute;
+    inset: 0;
+    z-index: var(--z-sticky);
+    width: 100%;
+    max-width: none;
+    background: var(--surface);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
