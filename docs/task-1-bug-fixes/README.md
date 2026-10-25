@@ -2,7 +2,7 @@
 
 > **Branch:** `fix/core-bugs` (cut from `main` after the `docs/project-roadmap` PR is merged)
 > **Goal:** make the existing app run correctly and safely on every OS and on Vercel *before* any UI or feature work starts.
-> **Status:** 🚧 In progress — Phase 1 ✅ · Phase 2 ✅
+> **Status:** ✅ Complete — Phase 1 ✅ · Phase 2 ✅ · Phase 3 ✅
 
 ---
 
@@ -23,7 +23,7 @@ Legend for file changes: **A** = added, **M** = modified, **D** = deleted.
 |------:|-------|-----------:|------:|--------|
 | 1 | Backend configuration, environment & startup | 8 | 8 | ✅ |
 | 2 | Backend webhooks (Inngest), Stream helpers & API | 10 | 7 | ✅ |
-| 3 | Frontend routing, lint & repo hygiene | 9 | 9 | ⏳ |
+| 3 | Frontend routing, lint & repo hygiene | 9 | 9 | ✅ |
 
 ---
 
@@ -138,7 +138,7 @@ Legend for file changes: **A** = added, **M** = modified, **D** = deleted.
 | ID | Bug | Impact | Fix |
 |----|-----|--------|-----|
 | F1 | Two `<Routes>` blocks inside `<SignedIn>`: the second sends `*` to `/auth`, the first sends `/auth` back to `/` | **Infinite redirect loop** for every signed-in user | One route table per auth state |
-| F2 | Unused imports (`SignInButton`, `UserButton`) in `App.jsx` | `npm run lint` fails | Remove them |
+| F2 | Unused imports (`SignInButton`, `UserButton`) in `App.jsx` | Dead code that bloats the module (the lint rule's `^[A-Z_]` ignore pattern hides it, so lint never flagged it) | Remove them |
 | F3 | Stray `{" "}` text nodes inside `<Routes>` | Invalid children, noisy markup | Remove them |
 | F4 | Unused `React` import in `HomePage.jsx` | Dead code | Remove it |
 | F5 | `<title>frontend</title>` and the default Vite favicon | Unprofessional browser tab | Brand title and favicon |
@@ -163,7 +163,15 @@ Legend for file changes: **A** = added, **M** = modified, **D** = deleted.
 
 **Verification:** `npm run lint` and `npm run build` in `frontend/` both pass.
 
-**Phase summary:** _pending_
+**Phase summary:** ✅ Done
+- `App.jsx` has one route table per auth state. Signed-in users get `/`, and everything else redirects to `/`. Signed-out users get `/auth`, and everything else redirects to `/auth`. This removes the `/` ↔ `/auth` redirect loop. The dead imports and stray `{" "}` text nodes are gone.
+- `HomePage.jsx` drops the unused `React` import. `main.jsx` gives an actionable missing-key error and sets `afterSignOutUrl="/auth"`.
+- `index.html` has the title "Slap — Where Work Happens" and the brand logo as favicon. `index.css` gets a minimal reset (box-sizing, zero body margin, a dark base background matching the auth page).
+- Added `frontend/.env.example` (Clerk key, API URL, Stream key) and `frontend/vercel.json` (SPA rewrite, so deep links stop returning 404 on refresh).
+- The root `.gitignore` now ignores `.env.*` (keeping `.env.example`), `dist`, `.vercel`, logs and OS/editor files. Checked with `git check-ignore`.
+- Verified: `npm run lint` passes with 0 problems, and `npm run build` succeeds (316 kB JS, 97 kB gzip). The routing fix was checked by reading the route tables. It couldn't be exercised in a browser here because no Clerk key is configured.
+- Correction to the plan: the original `App.jsx` did *not* fail lint (see F2). The fix stands; only the impact description changed.
+- File changes: 2 added, 7 modified (9), exactly as planned.
 
 ---
 
