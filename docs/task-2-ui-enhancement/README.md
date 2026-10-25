@@ -2,7 +2,7 @@
 
 > **Branch:** `feat/ui-enhancement` (cut from `main` after the Task 1 PR is merged)
 > **Goal:** replace the placeholder "Home Page" with a polished, responsive Slack-style workspace, and give the whole app one consistent design system.
-> **Status:** ⏳ Not started
+> **Status:** 🚧 In progress — Phase 1 ✅
 
 ---
 
@@ -25,7 +25,7 @@ Legend: **A** = added, **M** = modified, **D** = deleted.
 
 | Phase | Scope | Files | Status |
 |------:|-------|------:|--------|
-| 1 | Design system & app shell foundation | 8 | ⏳ |
+| 1 | Design system & app shell foundation | 8 | ✅ |
 | 2 | Auth (landing) page redesign | 3 | ⏳ |
 | 3 | Chat workspace: sidebar, channel list, chat window, threads | 13 | ⏳ |
 | 4 | Responsive layout, error handling & polish | 7 | ⏳ |
@@ -52,7 +52,18 @@ Legend: **A** = added, **M** = modified, **D** = deleted.
 | A | `frontend/src/components/PageLoader.jsx` |
 | M | `docs/task-2-ui-enhancement/README.md` |
 
-**Phase summary:** _pending_
+**Phase summary:** ✅ Done
+- `index.css` holds the full token set:
+  - brand, neutral, sidebar and status colours;
+  - a type scale, a 4 px spacing scale, radii and shadows;
+  - focus ring, motion, z-index layers and layout sizes.
+- It also has a modern reset, thin scrollbars, `:focus-visible` rings, `.sr-only`, `.spinner`, page-loader styles and a global `prefers-reduced-motion` override.
+- `index.html` preconnects to and loads Inter (400–800) and adds a meta description and `theme-color`.
+- `PageLoader` is a branded, screen-reader-announced (`role="status"`) loader. `App.jsx` shows it until Clerk reports `isLoaded`, which ends the blank flash.
+- `main.jsx` passes Clerk `appearance` variables (brand purple, Inter, 0.75 rem radius) and mounts a global themed `<Toaster />`.
+- Dependencies: `lucide-react@^1.61.0` and `react-hot-toast@^2.6.1` (both support React 19).
+- Verified: lint is clean, the build succeeds, and the loader renders correctly in the dev server's browser preview.
+- File changes: 1 added, 7 modified (8), exactly as planned.
 
 ---
 
