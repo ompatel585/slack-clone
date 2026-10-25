@@ -2,7 +2,7 @@
 
 > **Branch:** `feat/pro-features` (cut from `main` after the Task 2 PR is merged)
 > **Goal:** turn the chat workspace into a production-grade team tool with five new features, one phase per feature, and finish with project documentation.
-> **Status:** 🚧 In progress — Phase 1 ✅ · Phase 2 ✅ · Phase 3 ✅ · Phase 4 ✅ · Phase 5 ✅
+> **Status:** ✅ Complete — Phase 1 ✅ · Phase 2 ✅ · Phase 3 ✅ · Phase 4 ✅ · Phase 5 ✅ · Phase 6 ✅
 
 ---
 
@@ -41,7 +41,7 @@ Legend: **A** = added, **M** = modified, **D** = deleted.
 | 3 | Feature 3: video calls | 7 | ✅ |
 | 4 | Feature 4: members, invites, leave & pinned messages | 9 | ✅ |
 | 5 | Feature 5: global message search (⌘K) | 5 | ✅ |
-| 6 | Documentation & release notes | 3 | ⏳ |
+| 6 | Documentation & release notes | 3 | ✅ |
 
 ---
 
@@ -240,7 +240,30 @@ Legend: **A** = added, **M** = modified, **D** = deleted.
 | M | `frontend/README.md` |
 | M | `docs/task-3-pro-features/README.md` |
 
-**Phase summary:** _pending_
+**Phase summary:** ✅ Done
+- New root `README.md`: features, tech stack, an architecture diagram, both env-var tables (with required flags), local setup including the Inngest dev server, a Clerk / Stream / Vercel checklist, scripts, the API reference, project structure, and links to the three task READMEs.
+- `frontend/README.md` replaces the Vite template with frontend docs: scripts, env, a map of which file does what, styling layers, and accessibility notes.
+- **Deviation from the plan:** no screenshot is embedded. `frontend/public/screenshot-for-readme.png` turned out to be a third-party tutorial thumbnail, not this app, so using it would misrepresent the project. Add a real screenshot once the app runs with your keys.
+- File changes: 1 added, 2 modified (3), exactly as planned.
+
+---
+
+## Task 3 — final summary
+
+| # | Feature | Backend | Frontend | Verified with |
+|---|---------|:-------:|:--------:|---------------|
+| 1 | Create, browse & join channels | ✅ 3 endpoints | ✅ | Controller unit tests and browser preview |
+| 2 | Direct messages & presence | – | ✅ | Browser preview |
+| 3 | Video calls | – | ✅ | Browser preview (link and error states) |
+| 4 | Members, invites, leave & pins | ✅ 2 endpoints | ✅ | Controller unit tests and browser preview |
+| 5 | ⌘K message search | – | ✅ | Browser preview (search, keyboard, jump) |
+
+- **Bugs found and fixed while verifying:**
+  - `showModal()` stole focus from `autoFocus`;
+  - the unread badge's `aria-label` on a span was never announced;
+  - at 375 px the header pushed the chat column off-screen.
+- **Performance:** route-level code splitting keeps the signed-out bundle at 344 kB.
+- **Not covered:** a live session against real Clerk and Stream accounts, including two-person calls. The browser checks used an offline mock client that was never committed.
 
 ---
 
