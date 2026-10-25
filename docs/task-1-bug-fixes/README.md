@@ -2,7 +2,7 @@
 
 > **Branch:** `fix/core-bugs` (cut from `main` after the `docs/project-roadmap` PR is merged)
 > **Goal:** make the existing app run correctly and safely on every OS and on Vercel *before* any UI or feature work starts.
-> **Status:** ⏳ Not started
+> **Status:** 🚧 In progress — Phase 1 ✅
 
 ---
 
@@ -21,7 +21,7 @@ Legend for file changes: **A** = added, **M** = modified, **D** = deleted.
 
 | Phase | Scope | Bugs fixed | Files | Status |
 |------:|-------|-----------:|------:|--------|
-| 1 | Backend configuration, environment & startup | 8 | 8 | ⏳ |
+| 1 | Backend configuration, environment & startup | 8 | 8 | ✅ |
 | 2 | Backend webhooks (Inngest), Stream helpers & API | 10 | 7 | ⏳ |
 | 3 | Frontend routing, lint & repo hygiene | 9 | 9 | ⏳ |
 
@@ -55,7 +55,18 @@ Legend for file changes: **A** = added, **M** = modified, **D** = deleted.
 
 **Verification:** `node --check` on every backend file. The server must fail with a readable message when required env vars are missing.
 
-**Phase summary:** _pending_
+**Phase summary:** ✅ Done
+- Both npm scripts now use `node --import ./instrument.mjs` (with `nodemon --exec` for dev), so they run the same on Windows, macOS, Linux and CI. Added `engines.node >= 20.6`, which `--import` requires.
+- `env.js` validates the five required variables at import time and also requires `INNGEST_SIGNING_KEY` in production. It defines `CLIENT_URL` (default `http://localhost:5173`) and defaults `NODE_ENV` to `development`.
+- `connectDB` caches its connection promise, reuses an open connection, resets on failure so a retry is possible, and throws instead of calling `process.exit`.
+- Sentry samples 100 % of traces in development and 10 % in production. Local variables and default PII are only sent outside production. The unused `profilesSampleRate` is removed.
+- Deleted the duplicate `user. model.js` and the stray backend `auth.css`. Added a documented `backend/.env.example`.
+- Verified:
+  - `node --check` passes on all backend files.
+  - `npm start` with no `.env` prints `Missing required environment variables: MONGO_URI, CLERK_PUBLISHABLE_KEY, …`.
+  - With `NODE_ENV=production` and no Inngest key, it reports `INNGEST_SIGNING_KEY`.
+  - With an unreachable database, the start script boots and exits with code 1.
+- File changes: 1 added, 5 modified, 2 deleted (8), exactly as planned.
 
 ---
 

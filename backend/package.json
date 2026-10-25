@@ -3,11 +3,14 @@
   "version": "1.0.0",
   "main": "src/server.js",
   "scripts": {
-    "dev": "set NODE_OPTIONS=--import ./instrument.mjs && nodemon src/server.js",
-    "start": "set NODE_OPTIONS=--import ./instrument.mjs && node src/server.js"
+    "dev": "nodemon --exec \"node --import ./instrument.mjs\" src/server.js",
+    "start": "node --import ./instrument.mjs src/server.js"
   },
   "keywords": [],
   "type": "module",
+  "engines": {
+    "node": ">=20.6.0"
+  },
   "author": "",
   "license": "ISC",
   "description": "",
