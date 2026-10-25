@@ -2,7 +2,7 @@
 
 > **Branch:** `feat/pro-features` (cut from `main` after the Task 2 PR is merged)
 > **Goal:** turn the chat workspace into a production-grade team tool with five new features, one phase per feature, and finish with project documentation.
-> **Status:** 🚧 In progress — Phase 1 ✅
+> **Status:** 🚧 In progress — Phase 1 ✅ · Phase 2 ✅
 
 ---
 
@@ -37,7 +37,7 @@ Legend: **A** = added, **M** = modified, **D** = deleted.
 | Phase | Feature | Files | Status |
 |------:|---------|------:|--------|
 | 1 | Feature 1: create, browse & join channels | 10 | ✅ |
-| 2 | Feature 2: direct messages & online presence | 5 | ⏳ |
+| 2 | Feature 2: direct messages & online presence | 5 | ✅ |
 | 3 | Feature 3: video calls | 7 | ⏳ |
 | 4 | Feature 4: members, invites, leave & pinned messages | 8 | ⏳ |
 | 5 | Feature 5: global message search (⌘K) | 5 | ⏳ |
@@ -97,7 +97,18 @@ Legend: **A** = added, **M** = modified, **D** = deleted.
 | M | `frontend/src/styles/workspace.css` |
 | M | `docs/task-3-pro-features/README.md` |
 
-**Phase summary:** _pending_
+**Phase summary:** ✅ Done
+- `UsersList`:
+  - loads up to 30 workspace users with `presence: true`, sorted online first and then by name;
+  - avatars with live status dots, updated on `user.presence.changed`;
+  - screen-reader "online" / "offline" text;
+  - unread badges for each DM, recomputed on message and read events;
+  - skeleton, error and empty states.
+- Clicking a person opens or creates the distinct 1:1 channel (`client.channel("messaging", { members: [me, them] })`), which reuses the existing conversation if there is one.
+- `Sidebar` has a new "Direct messages" section. `channelRenderFilterFn` removes the `!members-…` DM channels from the Channels list.
+- `CustomChannelHeader` shows the partner's avatar, name and "Active now" or a localised "Last seen 42 minutes ago" (`Intl.RelativeTimeFormat`) in DMs, and hides the member and online pills there.
+- Verified in the browser preview: the DM list sorts online users first; opening Raj creates and highlights the DM; the header shows "Last seen 42 minutes ago"; the Channels section lists only real channels. Lint is clean and the build succeeds.
+- File changes: 1 added, 4 modified (5), exactly as planned.
 
 ---
 

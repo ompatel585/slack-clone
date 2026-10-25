@@ -1,13 +1,18 @@
 import { useEffect, useMemo, useState } from "react";
 import { ChannelList, useChatContext } from "stream-chat-react";
 import { UserButton, useUser } from "@clerk/clerk-react";
-import { Compass, Hash, Plus, X } from "lucide-react";
+import { Compass, Hash, MessageCircle, Plus, X } from "lucide-react";
 import CustomChannelPreview from "./CustomChannelPreview";
 import CreateChannelModal from "./CreateChannelModal";
 import BrowseChannelsModal from "./BrowseChannelsModal";
+import UsersList from "./UsersList";
 
 const CHANNEL_SORT = { last_message_at: -1 };
 const CHANNEL_OPTIONS = { state: true, watch: true, presence: true, limit: 30 };
+
+// 1:1 conversations live in the "Direct messages" section, not among channels
+const withoutDirectMessages = (channels) =>
+  channels.filter((channel) => !channel.id?.startsWith("!members-"));
 
 const ChannelListEmpty = () => (
   <p className="sidebar__empty">No channels yet. Channels you join will show up here.</p>
@@ -94,8 +99,15 @@ const Sidebar = ({ isOpen = false, onClose }) => {
           Preview={CustomChannelPreview}
           EmptyStateIndicator={ChannelListEmpty}
           LoadingIndicator={ChannelListSkeleton}
+          channelRenderFilterFn={withoutDirectMessages}
           setActiveChannelOnMount
         />
+
+        <div className="sidebar__section-header sidebar__section-header--spaced">
+          <MessageCircle size={14} aria-hidden="true" />
+          <span>Direct messages</span>
+        </div>
+        <UsersList />
       </nav>
 
       <footer className="sidebar__footer">
