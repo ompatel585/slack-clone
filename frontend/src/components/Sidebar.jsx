@@ -1,8 +1,10 @@
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ChannelList, useChatContext } from "stream-chat-react";
 import { UserButton, useUser } from "@clerk/clerk-react";
-import { Hash, X } from "lucide-react";
+import { Compass, Hash, Plus, X } from "lucide-react";
 import CustomChannelPreview from "./CustomChannelPreview";
+import CreateChannelModal from "./CreateChannelModal";
+import BrowseChannelsModal from "./BrowseChannelsModal";
 
 const CHANNEL_SORT = { last_message_at: -1 };
 const CHANNEL_OPTIONS = { state: true, watch: true, presence: true, limit: 30 };
@@ -22,6 +24,7 @@ const ChannelListSkeleton = () => (
 const Sidebar = ({ isOpen = false, onClose }) => {
   const { client, channel: activeChannel } = useChatContext();
   const { user } = useUser();
+  const [openModal, setOpenModal] = useState(null); // "create" | "browse" | null
 
   const filters = useMemo(
     () => ({ type: "messaging", members: { $in: [client.userID] } }),
@@ -62,6 +65,26 @@ const Sidebar = ({ isOpen = false, onClose }) => {
         <div className="sidebar__section-header">
           <Hash size={14} aria-hidden="true" />
           <span>Channels</span>
+          <div className="sidebar__section-actions">
+            <button
+              type="button"
+              className="sidebar__section-btn"
+              onClick={() => setOpenModal("browse")}
+              aria-label="Browse channels"
+              title="Browse channels"
+            >
+              <Compass size={15} />
+            </button>
+            <button
+              type="button"
+              className="sidebar__section-btn"
+              onClick={() => setOpenModal("create")}
+              aria-label="Create channel"
+              title="Create channel"
+            >
+              <Plus size={16} />
+            </button>
+          </div>
         </div>
 
         <ChannelList
@@ -85,6 +108,14 @@ const Sidebar = ({ isOpen = false, onClose }) => {
           </span>
         </div>
       </footer>
+
+      {openModal === "create" && <CreateChannelModal onClose={() => setOpenModal(null)} />}
+      {openModal === "browse" && (
+        <BrowseChannelsModal
+          onClose={() => setOpenModal(null)}
+          onCreateChannel={() => setOpenModal("create")}
+        />
+      )}
     </aside>
   );
 };

@@ -2,7 +2,7 @@
 
 > **Branch:** `feat/pro-features` (cut from `main` after the Task 2 PR is merged)
 > **Goal:** turn the chat workspace into a production-grade team tool with five new features, one phase per feature, and finish with project documentation.
-> **Status:** ⏳ Not started
+> **Status:** 🚧 In progress — Phase 1 ✅
 
 ---
 
@@ -36,7 +36,7 @@ Legend: **A** = added, **M** = modified, **D** = deleted.
 
 | Phase | Feature | Files | Status |
 |------:|---------|------:|--------|
-| 1 | Feature 1: create, browse & join channels | 10 | ⏳ |
+| 1 | Feature 1: create, browse & join channels | 10 | ✅ |
 | 2 | Feature 2: direct messages & online presence | 5 | ⏳ |
 | 3 | Feature 3: video calls | 7 | ⏳ |
 | 4 | Feature 4: members, invites, leave & pinned messages | 8 | ⏳ |
@@ -64,7 +64,22 @@ Legend: **A** = added, **M** = modified, **D** = deleted.
 | M | `frontend/src/components/Sidebar.jsx` |
 | M | `docs/task-3-pro-features/README.md` |
 
-**Phase summary:** _pending_
+**Phase summary:** ✅ Done
+- Backend `POST /api/channels`, `GET /api/channels/public` and `POST /api/channels/:id/join`, all behind `protectRoute`:
+  - names are normalised (`"Product Launch!"` → `product-launch`) and must be unique (409 on a duplicate);
+  - ids are a slug plus a random suffix;
+  - private channels are non-discoverable and invite-only (joining one returns 403);
+  - ids are validated, and errors come back as user-friendly JSON.
+- Frontend:
+  - a reusable `Modal` on native `<dialog>` with a focus trap, Escape, backdrop click and `data-autofocus`;
+  - `CreateChannelModal`: live name preview, description counter, Public/Private cards and a searchable people picker;
+  - `BrowseChannelsModal`: search, member counts, and Joined / Open / Join states;
+  - Compass (browse) and + (create) triggers in the sidebar.
+- Verified:
+  - controller unit tests with stubbed Stream: 400 / 409 / 201 / 403 / 404 / 200 paths;
+  - browser preview with mocked API and Stream: create flow (toast, channel opens), duplicate-name error, browse → join.
+- Fix found during the preview: `showModal()` stole focus from React's `autoFocus`, now replaced by `data-autofocus`.
+- File changes: 6 added, 4 modified (10), exactly as planned.
 
 ---
 
