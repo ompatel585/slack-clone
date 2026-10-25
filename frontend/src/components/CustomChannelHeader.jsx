@@ -1,7 +1,12 @@
 import { useEffect, useState } from "react";
 import { useChannelStateContext, useChatContext } from "stream-chat-react";
-import { Hash, Lock, Menu, Users, Video } from "lucide-react";
+import { Hash, Lock, LogOut, Menu, Pin, UserPlus, Users, Video } from "lucide-react";
 import toast from "react-hot-toast";
+import Modal from "./Modal";
+import MembersModal from "./MembersModal";
+import InviteModal from "./InviteModal";
+import PinnedMessagesModal from "./PinnedMessagesModal";
+import { getErrorMessage, leaveChannel } from "../lib/api";
 
 const relativeTime = new Intl.RelativeTimeFormat(undefined, { numeric: "auto" });
 
@@ -46,9 +51,19 @@ const useDirectMessagePartner = (channel) => {
 };
 
 const CustomChannelHeader = ({ onMenuClick }) => {
-  const { channel, watcher_count: watcherCount = 0 } = useChannelStateContext();
+  const { channel, watcher_count: watcherCount = 0, pinnedMessages = [] } = useChannelStateContext();
+  const { setActiveChannel } = useChatContext();
   const partner = useDirectMessagePartner(channel);
   const [isStartingCall, setIsStartingCall] = useState(false);
+  const [openModal, setOpenModal] = useState(null); // "members" | "invite" | "pinned" | "leave" | null
+  const [isLeaving, setIsLeaving] = useState(false);
+
+  const isDirectMessage = Boolean(channel.id?.startsWith("!members-"));
+  const name = partner ? partner.name || partner.id : channel.data?.name || channel.id;
+  const description = channel.data?.description;
+  const ChannelIcon = channel.data?.private ? Lock : Hash;
+  const memberCount = channel.data?.member_count ?? Object.keys(channel.state.members).length;
+  const closeModal = () => setOpenModal(null);
 
   // Every call gets a fresh id so an old link in the history never drops people into a new call
   const startCall = async () => {
@@ -69,10 +84,18 @@ const CustomChannelHeader = ({ onMenuClick }) => {
     }
   };
 
-  const name = partner ? partner.name || partner.id : channel.data?.name || channel.id;
-  const description = channel.data?.description;
-  const ChannelIcon = channel.data?.private ? Lock : Hash;
-  const memberCount = channel.data?.member_count ?? Object.keys(channel.state.members).length;
+  const handleLeave = async () => {
+    setIsLeaving(true);
+    try {
+      await leaveChannel(channel.id);
+      toast.success(`You left #${name}`);
+      closeModal();
+      setActiveChannel(undefined);
+    } catch (error) {
+      toast.error(getErrorMessage(error, "Couldn't leave the channel."));
+      setIsLeaving(false);
+    }
+  };
 
   return (
     <header className="channel-header">
@@ -114,20 +137,26 @@ const CustomChannelHeader = ({ onMenuClick }) => {
       )}
 
       <div className="channel-header__meta">
-        {!partner && (
-          <span className="channel-header__stat" title={`${memberCount} members`}>
+        {!isDirectMessage && (
+          <button
+            type="button"
+            className="channel-header__stat channel-header__stat--button"
+            onClick={() => setOpenModal("members")}
+            title="View members"
+          >
             <Users size={16} aria-hidden="true" />
             {memberCount}
-            <span className="sr-only">members</span>
-          </span>
+            <span className="sr-only">members — view list</span>
+          </button>
         )}
-        {!partner && watcherCount > 0 && (
+        {!isDirectMessage && watcherCount > 0 && (
           <span className="channel-header__stat channel-header__stat--online">
             <span className="presence-dot" aria-hidden="true" />
             {watcherCount}
             <span className="channel-header__stat-label"> online</span>
           </span>
         )}
+
         <div className="channel-header__actions">
           <button
             type="button"
@@ -139,9 +168,74 @@ const CustomChannelHeader = ({ onMenuClick }) => {
           >
             <Video size={18} />
           </button>
-          {/* Members, invite and pinned-message actions are added in Phase 4 */}
+          <button
+            type="button"
+            className="icon-btn icon-btn--counter"
+            onClick={() => setOpenModal("pinned")}
+            aria-label={`Pinned messages (${pinnedMessages.length})`}
+            title="Pinned messages"
+          >
+            <Pin size={18} />
+            {pinnedMessages.length > 0 && (
+              <span className="icon-btn__count" aria-hidden="true">
+                {pinnedMessages.length}
+              </span>
+            )}
+          </button>
+          {!isDirectMessage && (
+            <>
+              <button
+                type="button"
+                className="icon-btn"
+                onClick={() => setOpenModal("invite")}
+                aria-label="Invite people"
+                title="Invite people"
+              >
+                <UserPlus size={18} />
+              </button>
+              <button
+                type="button"
+                className="icon-btn icon-btn--danger"
+                onClick={() => setOpenModal("leave")}
+                aria-label="Leave channel"
+                title="Leave channel"
+              >
+                <LogOut size={18} />
+              </button>
+            </>
+          )}
         </div>
       </div>
+
+      {openModal === "members" && (
+        <MembersModal channel={channel} onClose={closeModal} onInvite={() => setOpenModal("invite")} />
+      )}
+      {openModal === "invite" && <InviteModal channel={channel} onClose={closeModal} />}
+      {openModal === "pinned" && <PinnedMessagesModal onClose={closeModal} />}
+      {openModal === "leave" && (
+        <Modal
+          title={`Leave #${name}?`}
+          onClose={closeModal}
+          size="sm"
+          footer={
+            <>
+              <button type="button" className="btn btn--ghost" onClick={closeModal} data-autofocus>
+                Cancel
+              </button>
+              <button type="button" className="btn btn--danger" onClick={handleLeave} disabled={isLeaving}>
+                {isLeaving && <span className="spinner spinner--sm" aria-hidden="true" />}
+                Leave channel
+              </button>
+            </>
+          }
+        >
+          <p className="confirm-text">
+            {channel.data?.private
+              ? "This channel is private — you'll need an invite from a member to rejoin."
+              : "You can rejoin any time from Browse channels."}
+          </p>
+        </Modal>
+      )}
     </header>
   );
 };

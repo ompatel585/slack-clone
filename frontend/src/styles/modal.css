@@ -439,3 +439,199 @@
     flex: 1;
   }
 }
+
+/* ==========================================================================
+   Channel management: members & pinned messages
+   ========================================================================== */
+.picker-list--tall {
+  max-height: 18rem;
+  margin-top: var(--space-3);
+}
+
+.member-list,
+.pinned-list {
+  list-style: none;
+  margin: var(--space-3) 0 0;
+  padding: 0;
+}
+
+.member-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2);
+  border-radius: var(--radius-sm);
+}
+
+.member-item:hover {
+  background: var(--surface-muted);
+}
+
+.member-item__name {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--text-sm);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.member-item__you {
+  font-weight: 400;
+  color: var(--text-subtle);
+}
+
+.member-item__status {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--text-xs);
+  color: var(--text-subtle);
+}
+
+.member-item__status::before {
+  content: "";
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: var(--radius-full);
+  border: 1.5px solid var(--text-subtle);
+}
+
+.member-item__status.is-online {
+  color: var(--success);
+}
+
+.member-item__status.is-online::before {
+  background: var(--online);
+  border-color: var(--online);
+}
+
+.pinned-item {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin-bottom: var(--space-2);
+  padding: var(--space-3) var(--space-4);
+  text-align: left;
+  background: var(--surface-muted);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--warning);
+  border-radius: var(--radius-md);
+  transition: background var(--duration-fast), border-color var(--duration-fast);
+}
+
+.pinned-item:hover {
+  background: var(--brand-100);
+  border-color: var(--brand-300);
+  border-left-color: var(--warning);
+}
+
+.pinned-item__meta {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-3);
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.pinned-item__meta strong {
+  color: var(--text);
+}
+
+.pinned-item__text {
+  font-size: var(--text-sm);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.pinned-item__by {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--text-xs);
+  color: var(--text-subtle);
+}
+
+/* Destructive confirmation (leave channel) */
+.btn--danger {
+  color: var(--text-inverse);
+  background: var(--danger);
+}
+
+.btn--danger:hover:not(:disabled) {
+  background: #c0144a;
+}
+
+.confirm-text {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+.modal--sm {
+  width: min(100% - 2rem, 420px);
+}
+
+/* Header action extras */
+.channel-header__stat--button {
+  cursor: pointer;
+  transition: background var(--duration-fast), border-color var(--duration-fast);
+}
+
+.channel-header__stat--button:hover {
+  background: var(--surface-sunken);
+  border-color: var(--border-strong);
+}
+
+.icon-btn--counter {
+  position: relative;
+}
+
+.icon-btn__count {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  min-width: 1rem;
+  height: 1rem;
+  padding: 0 0.25rem;
+  display: grid;
+  place-items: center;
+  font-size: 0.625rem;
+  font-weight: 700;
+  color: var(--text-inverse);
+  background: var(--brand-500);
+  border-radius: var(--radius-full);
+}
+
+.icon-btn--danger:hover {
+  color: var(--danger);
+  background: rgba(224, 30, 90, 0.08);
+}
+
+/* The extra header actions must never push the chat column wider than a phone screen */
+.workspace__main .str-chat__main-panel,
+.channel-header {
+  min-width: 0;
+}
+
+@media (max-width: 768px) {
+  .channel-header__meta {
+    gap: var(--space-1);
+  }
+
+  .channel-header__stat--online {
+    display: none;
+  }
+
+  .channel-header__stat {
+    padding: 2px var(--space-2);
+  }
+
+  .channel-header__actions .icon-btn {
+    width: 2rem;
+    height: 2rem;
+  }
+}

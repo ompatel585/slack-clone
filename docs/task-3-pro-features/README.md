@@ -2,7 +2,7 @@
 
 > **Branch:** `feat/pro-features` (cut from `main` after the Task 2 PR is merged)
 > **Goal:** turn the chat workspace into a production-grade team tool with five new features, one phase per feature, and finish with project documentation.
-> **Status:** 🚧 In progress — Phase 1 ✅ · Phase 2 ✅ · Phase 3 ✅
+> **Status:** 🚧 In progress — Phase 1 ✅ · Phase 2 ✅ · Phase 3 ✅ · Phase 4 ✅
 
 ---
 
@@ -39,7 +39,7 @@ Legend: **A** = added, **M** = modified, **D** = deleted.
 | 1 | Feature 1: create, browse & join channels | 10 | ✅ |
 | 2 | Feature 2: direct messages & online presence | 5 | ✅ |
 | 3 | Feature 3: video calls | 7 | ✅ |
-| 4 | Feature 4: members, invites, leave & pinned messages | 8 | ⏳ |
+| 4 | Feature 4: members, invites, leave & pinned messages | 9 | ✅ |
 | 5 | Feature 5: global message search (⌘K) | 5 | ⏳ |
 | 6 | Documentation & release notes | 3 | ⏳ |
 
@@ -171,9 +171,29 @@ Legend: **A** = added, **M** = modified, **D** = deleted.
 | A | `frontend/src/components/InviteModal.jsx` |
 | A | `frontend/src/components/PinnedMessagesModal.jsx` |
 | M | `frontend/src/components/CustomChannelHeader.jsx` |
+| M | `frontend/src/styles/modal.css` *(added during implementation, see note)* |
 | M | `docs/task-3-pro-features/README.md` |
 
-**Phase summary:** _pending_
+**Phase summary:** ✅ Done
+- Backend:
+  - `POST /api/channels/:id/members` validates 1–50 user ids and requires the requester to be a member (checked with `channel.queryMembers`, which is accurate beyond the first 100 members). It de-duplicates, skips the requester, ignores unknown users, and posts "added Raj Mehta, Kim Lee to #design".
+  - `POST /api/channels/:id/leave` requires membership and posts "left the channel".
+  - DM ids are rejected by the id pattern.
+- `MembersModal`: searchable, online-first, with Owner / Moderator badges, "(you)", online status and an **Invite people** shortcut.
+- `InviteModal`: shows only workspace users who aren't in the channel yet, with multi-select and an "Invite N people" button.
+- `PinnedMessagesModal`: newest pins first with author, time and "Pinned by". Clicking one closes the modal and `jumpToMessage`s to it. Messages are pinned with Stream's built-in **Pin** action.
+- Header actions:
+  - the member-count pill is now a button that opens the members list;
+  - 📌 shows a pin-count badge;
+  - ➕ invite and 🚪 leave appear in channels only;
+  - leaving needs confirmation (Cancel is focused by default, and the message changes for private channels), then returns to "Pick a conversation".
+- **Deviation from the fixed file list:** `frontend/src/styles/modal.css` was also modified. The new lists, badge, danger button and header-action styles needed a home, and `modal.css` already holds the dialog UI. It was planned for Phase 5 anyway, so the task's unique file total doesn't change (still 25).
+- Bug found and fixed in the preview: at 375 px the extra header actions widened the header to 416 px and pushed the chat column off-screen, cutting off the send button. Phones now hide the online pill, use compact 32 px action buttons, and let the panel shrink (`min-width: 0`).
+- Verified:
+  - controller unit tests with stubbed Stream: 400 / 403 / 404 / 200 paths, de-duplication, and the system message text;
+  - browser preview: members list, invite → toast, pinned → jump, leave → confirm → empty state, and the 375 px header fit.
+- Lint is clean and the build succeeds.
+- File changes: 3 added, 6 modified (9; the plan said 8, see the deviation note).
 
 ---
 
@@ -218,7 +238,7 @@ Legend: **A** = added, **M** = modified, **D** = deleted.
 | 1 | 6 | 4 | 0 | 10 |
 | 2 | 1 | 4 | 0 | 5 |
 | 3 | 2 | 5 | 0 | 7 |
-| 4 | 3 | 5 | 0 | 8 |
+| 4 | 3 | 6 | 0 | 9 |
 | 5 | 1 | 4 | 0 | 5 |
 | 6 | 1 | 2 | 0 | 3 |
 | **Unique files (whole task)** | **14** | **11** | **0** | **25** |

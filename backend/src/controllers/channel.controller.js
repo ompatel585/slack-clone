@@ -127,3 +127,79 @@ export const joinChannel = async (req, res) => {
         res.status(500).json({ message: "Failed to join channel" });
     }
 };
+
+const MAX_INVITES = 50;
+
+// Only people already in a channel may change who else is in it
+const isChannelMember = async (channel, userId) => {
+    const { members } = await channel.queryMembers({ user_id: userId }, {}, { limit: 1 });
+    return members.length > 0;
+};
+
+export const addMembers = async (req, res) => {
+    try {
+        const { userId } = req.auth();
+        const { id } = req.params;
+        const { userIds } = req.body ?? {};
+
+        if (!CHANNEL_ID_PATTERN.test(id)) {
+            return res.status(400).json({ message: "Invalid channel id" });
+        }
+        if (
+            !Array.isArray(userIds) ||
+            userIds.length === 0 ||
+            userIds.length > MAX_INVITES ||
+            userIds.some((userIdToAdd) => typeof userIdToAdd !== "string" || !userIdToAdd)
+        ) {
+            return res.status(400).json({ message: `Choose between 1 and ${MAX_INVITES} people to invite.` });
+        }
+
+        const channel = await findChannel(id);
+        if (!channel) return res.status(404).json({ message: "Channel not found" });
+
+        if (!(await isChannelMember(channel, userId))) {
+            return res.status(403).json({ message: "Only channel members can invite people." });
+        }
+
+        const uniqueIds = [...new Set(userIds)].filter((userIdToAdd) => userIdToAdd !== userId);
+        const { users } = await streamClient.queryUsers({ id: { $in: uniqueIds } });
+        if (users.length === 0) {
+            return res.status(400).json({ message: "None of those people exist in this workspace." });
+        }
+
+        const names = users.map((user) => user.name || user.id).join(", ");
+        await channel.addMembers(
+            users.map((user) => user.id),
+            { text: `added ${names} to #${channel.data.name}`, user_id: userId }
+        );
+
+        res.status(200).json({ added: users.map((user) => ({ id: user.id, name: user.name })) });
+    } catch (error) {
+        console.error("Error adding channel members:", error.message);
+        res.status(500).json({ message: "Failed to invite people" });
+    }
+};
+
+export const leaveChannel = async (req, res) => {
+    try {
+        const { userId } = req.auth();
+        const { id } = req.params;
+
+        if (!CHANNEL_ID_PATTERN.test(id)) {
+            return res.status(400).json({ message: "Invalid channel id" });
+        }
+
+        const channel = await findChannel(id);
+        if (!channel) return res.status(404).json({ message: "Channel not found" });
+
+        if (!(await isChannelMember(channel, userId))) {
+            return res.status(400).json({ message: "You're not a member of this channel." });
+        }
+
+        await channel.removeMembers([userId], { text: "left the channel", user_id: userId });
+        res.status(200).json({ left: channel.cid });
+    } catch (error) {
+        console.error("Error leaving channel:", error.message);
+        res.status(500).json({ message: "Failed to leave channel" });
+    }
+};

@@ -20,6 +20,16 @@ export const joinChannel = async (channelId) => {
   return data.channel;
 };
 
+export const addChannelMembers = async (channelId, userIds) => {
+  const { data } = await axiosInstance.post(`/channels/${encodeURIComponent(channelId)}/members`, { userIds });
+  return data.added;
+};
+
+export const leaveChannel = async (channelId) => {
+  const { data } = await axiosInstance.post(`/channels/${encodeURIComponent(channelId)}/leave`);
+  return data;
+};
+
 // Server messages are written for users; fall back to a generic one for network errors
 export const getErrorMessage = (error, fallback = "Something went wrong. Please try again.") =>
   error?.response?.data?.message || fallback;
