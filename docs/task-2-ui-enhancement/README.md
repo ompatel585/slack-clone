@@ -2,7 +2,7 @@
 
 > **Branch:** `feat/ui-enhancement` (cut from `main` after the Task 1 PR is merged)
 > **Goal:** replace the placeholder "Home Page" with a polished, responsive Slack-style workspace, and give the whole app one consistent design system.
-> **Status:** 🚧 In progress — Phase 1 ✅
+> **Status:** 🚧 In progress — Phase 1 ✅ · Phase 2 ✅
 
 ---
 
@@ -26,7 +26,7 @@ Legend: **A** = added, **M** = modified, **D** = deleted.
 | Phase | Scope | Files | Status |
 |------:|-------|------:|--------|
 | 1 | Design system & app shell foundation | 8 | ✅ |
-| 2 | Auth (landing) page redesign | 3 | ⏳ |
+| 2 | Auth (landing) page redesign | 3 | ✅ |
 | 3 | Chat workspace: sidebar, channel list, chat window, threads | 13 | ⏳ |
 | 4 | Responsive layout, error handling & polish | 7 | ⏳ |
 
@@ -79,7 +79,23 @@ Legend: **A** = added, **M** = modified, **D** = deleted.
 | M | `frontend/src/styles/auth.css` |
 | M | `docs/task-2-ui-enhancement/README.md` |
 
-**Phase summary:** _pending_
+**Phase summary:** ✅ Done
+- `AuthPage.jsx`:
+  - semantic markup: `<main>`, two `<section>`s with the illustration side `aria-hidden`, and `<ul>` lists;
+  - a "Real-time team chat" eyebrow and a gradient-accented headline;
+  - features rendered from data with lucide icons and descriptions;
+  - a primary **Get started** (`SignUpButton`) plus a secondary **I already have an account** (`SignInButton`);
+  - a trust row;
+  - two decorative "live" cards floating over the illustration.
+- Wording change from the plan: the trust row says **"Encrypted in transit"**, not "end-to-end encryption". Stream Chat isn't E2E-encrypted, so the original wording would have been a false security claim.
+- `auth.css`:
+  - uses design tokens throughout;
+  - fluid `clamp()` headline that no longer overflows on small screens;
+  - visible `:focus-visible` ring on both CTAs and an entrance animation;
+  - breakpoints at 1100, 900 and 480 px (stacked layout, full-width CTAs, decorative cards hidden on phones);
+  - the illustration is lazy-loaded; global reduced-motion rules stop the float animations.
+- Verified in the browser preview with a Clerk mock at 1280 × 860 and at 375 × 812. There is no horizontal overflow at 375 px. Lint is clean and the build succeeds.
+- File changes: 0 added, 3 modified (3), exactly as planned.
 
 ---
 
