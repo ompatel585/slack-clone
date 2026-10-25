@@ -2,7 +2,7 @@
 
 > **Branch:** `fix/core-bugs` (cut from `main` after the `docs/project-roadmap` PR is merged)
 > **Goal:** make the existing app run correctly and safely on every OS and on Vercel *before* any UI or feature work starts.
-> **Status:** 🚧 In progress — Phase 1 ✅
+> **Status:** 🚧 In progress — Phase 1 ✅ · Phase 2 ✅
 
 ---
 
@@ -22,7 +22,7 @@ Legend for file changes: **A** = added, **M** = modified, **D** = deleted.
 | Phase | Scope | Bugs fixed | Files | Status |
 |------:|-------|-----------:|------:|--------|
 | 1 | Backend configuration, environment & startup | 8 | 8 | ✅ |
-| 2 | Backend webhooks (Inngest), Stream helpers & API | 10 | 7 | ⏳ |
+| 2 | Backend webhooks (Inngest), Stream helpers & API | 10 | 7 | ✅ |
 | 3 | Frontend routing, lint & repo hygiene | 9 | 9 | ⏳ |
 
 ---
@@ -99,7 +99,37 @@ Legend for file changes: **A** = added, **M** = modified, **D** = deleted.
 
 **Verification:** `node --check` on every backend file, plus an import smoke test of the middleware modules.
 
-**Phase summary:** _pending_
+**Phase summary:** ✅ Done
+- `inngest.js` now runs every side effect as a named `step.run`, so a failed step is retried on its own. It:
+  - imports `deleteStreamUser`,
+  - upserts users idempotently,
+  - builds profiles with safe email and name fallbacks,
+  - adds new users to all public channels,
+  - handles `clerk/user.updated`.
+- `stream.js` re-throws errors (a 404 on delete counts as success), pages through every discoverable channel 30 at a time, and exports the shared `streamClient` for later API work.
+- `chat.controller.js` returns 500 instead of `200 { token: null }`. `protectRoute` checks `userId`.
+- `server.js`:
+  - `/debug-sentry` only exists outside production;
+  - new `GET /api/health` reports the database state;
+  - `CLIENT_URL` accepts a comma-separated list of origins;
+  - JSON `notFound` and `errorHandler` sit after the Sentry handler;
+  - a failed DB connection no longer kills the Vercel function.
+- New `error.middleware.js`: 500 responses hide internals, 4xx messages pass through, and the stack is only included outside production.
+- Verified with a live HTTP smoke test of the real app:
+
+  | Request | Result |
+  |---------|--------|
+  | `GET /api/health` | 200 |
+  | `GET /debug-sentry` in production | 404 JSON |
+  | Unknown route | 404 JSON |
+  | `GET /api/chat/token` without a session | 401 |
+  | Allowed origin | `Access-Control-Allow-Origin` echoed |
+  | Disallowed origin | no CORS header |
+  | Bad Inngest signature | 401 |
+  | Thrown error | `500 {"message":"Internal server error"}` |
+  | Malformed JSON body | 400 with the parse message |
+
+- File changes: 1 added, 6 modified (7), exactly as planned.
 
 ---
 
