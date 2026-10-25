@@ -1,0 +1,128 @@
+/* Brand the Stream Video theme */
+.call-theme.str-video {
+  --str-video__primary-color: var(--brand-500);
+  --str-video__background-color0: var(--brand-950);
+  --str-video__background-color1: var(--brand-900);
+  --str-video__base-color1: var(--brand-800);
+  --str-video__font-family: var(--font-sans);
+  height: 100vh;
+  height: 100dvh;
+  font-family: var(--font-sans);
+}
+
+.call-page {
+  height: 100vh;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  color: var(--text-inverse);
+  background: radial-gradient(ellipse at top, #2a1145 0%, var(--brand-950) 70%);
+}
+
+/* ── Header ───────────────────────────────────────────── */
+.call-header {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-5);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.call-header__back {
+  width: 2.25rem;
+  height: 2.25rem;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: var(--radius-md);
+  color: var(--text-inverse);
+  background: rgba(255, 255, 255, 0.08);
+  transition: background var(--duration-fast);
+}
+
+.call-header__back:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.call-header__info {
+  flex: 1;
+  min-width: 0;
+}
+
+.call-header__title {
+  font-size: var(--text-lg);
+  font-weight: 700;
+}
+
+.call-header__meta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+  font-size: var(--text-xs);
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.call-header__live {
+  width: 0.5rem;
+  height: 0.5rem;
+  margin-right: var(--space-1);
+  border-radius: var(--radius-full);
+  background: var(--danger);
+  box-shadow: 0 0 0 4px rgba(224, 30, 90, 0.25);
+  animation: pulse 1.6s ease-in-out infinite;
+}
+
+.call-header__copy {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  color: var(--text-inverse);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: var(--radius-md);
+  transition: background var(--duration-fast);
+}
+
+.call-header__copy:hover {
+  background: rgba(255, 255, 255, 0.16);
+}
+
+/* ── Stage & controls ─────────────────────────────────── */
+.call-stage {
+  flex: 1;
+  min-height: 0;
+  padding: var(--space-4);
+}
+
+.call-stage .str-video__speaker-layout {
+  height: 100%;
+}
+
+.call-controls {
+  flex-shrink: 0;
+  display: flex;
+  justify-content: center;
+  padding: var(--space-3) var(--space-4) var(--space-5);
+}
+
+.call-error {
+  color: var(--text-inverse);
+}
+
+@media (max-width: 640px) {
+  .call-header {
+    padding: var(--space-3);
+  }
+
+  .call-header__copy span {
+    display: none;
+  }
+
+  .call-stage {
+    padding: var(--space-2);
+  }
+}
