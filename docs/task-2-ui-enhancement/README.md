@@ -2,7 +2,7 @@
 
 > **Branch:** `feat/ui-enhancement` (cut from `main` after the Task 1 PR is merged)
 > **Goal:** replace the placeholder "Home Page" with a polished, responsive Slack-style workspace, and give the whole app one consistent design system.
-> **Status:** 🚧 In progress — Phase 1 ✅ · Phase 2 ✅
+> **Status:** 🚧 In progress — Phase 1 ✅ · Phase 2 ✅ · Phase 3 ✅
 
 ---
 
@@ -27,7 +27,7 @@ Legend: **A** = added, **M** = modified, **D** = deleted.
 |------:|-------|------:|--------|
 | 1 | Design system & app shell foundation | 8 | ✅ |
 | 2 | Auth (landing) page redesign | 3 | ✅ |
-| 3 | Chat workspace: sidebar, channel list, chat window, threads | 13 | ⏳ |
+| 3 | Chat workspace: sidebar, channel list, chat window, threads | 13 | ✅ |
 | 4 | Responsive layout, error handling & polish | 7 | ⏳ |
 
 ---
@@ -128,7 +128,26 @@ Legend: **A** = added, **M** = modified, **D** = deleted.
 | A | `frontend/src/styles/stream-chat-theme.css` |
 | M | `docs/task-2-ui-enhancement/README.md` |
 
-**Phase summary:** _pending_
+**Phase summary:** ✅ Done
+- Dependencies: `stream-chat@^9.54.0` and `stream-chat-react@^13.14.6`. v13 is pinned on purpose, because v14 changed its component APIs. npm warns that the nested `react-image-gallery` peer range stops at React 18; `stream-chat-react` 13 itself supports React 19.
+- `lib/axios.js`: an axios instance on `VITE_API_URL` with a 15 s timeout. An interceptor attaches Clerk's session JWT as a `Bearer` token, because the cross-origin API never receives Clerk's cookie.
+- `lib/api.js`: the `getStreamToken()` helper.
+- `useStreamChat`:
+  - each effect run owns its own `StreamChat` instance with a `cancelled` guard, so StrictMode's double mount can't disconnect the live client;
+  - name and avatar are read through a ref, so profile edits don't force a reconnect;
+  - returns `{ chatClient, isLoading, error, retry }`.
+- `HomePage`: a `Chat` → `Sidebar` + `Channel` (`Window` with the custom header, `MessageList`, auto-focused `MessageInput`, plus `Thread`). A "Pick a conversation" `EmptyState` shows when no channel is selected.
+- `Sidebar`: brand header with Clerk `UserButton`, a "Channels" section with a `ChannelList` (the user's `messaging` channels sorted by latest message, presence on, first channel auto-selected), an empty-list hint, and a footer card for the current user.
+- `CustomChannelPreview`: `#` or 🔒 icon, ellipsized name, active and unread styles, a red badge capped at 99+, and `aria-current`. The unread count is announced through `.sr-only` text.
+- `CustomChannelHeader`: name, description, member count, an "N online" watcher pill, and an empty actions slot for Task 3.
+- `stream-chat-theme.css` re-maps Stream's v2 variables to the brand tokens (purple own-message bubbles, Inter, rounder radii), plus a card-style composer with a focus ring and a bordered thread panel. `workspace.css` holds the layout, sidebar, preview rows, header, empty state and shared `.btn` / `.icon-btn` styles.
+- Verified with an offline mock Stream client seeded with 5 channels (preview only, never committed) at 1366 × 800:
+  - the sidebar, active and unread states and the private-channel icon render;
+  - the header stats render, and own and other messages are styled correctly;
+  - switching channels updates the active row, header and messages.
+- One fix came out of the preview: the unread badge's `aria-label` on a `<span>` isn't announced, so the count moved to visually hidden text.
+- Lint is clean and the build succeeds. Vite warns that the chunk is over 500 kB (the Stream SDK); route-level code splitting is planned in Task 3 Phase 3, which already touches `App.jsx`.
+- File changes: 9 added, 4 modified (13), exactly as planned.
 
 ---
 

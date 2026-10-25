@@ -1,0 +1,69 @@
+/*
+ * Brand theme for stream-chat-react (CSS v2).
+ * Stream declares its variables on `.str-chat, .str-chat__theme-light`; this file is imported
+ * after Stream's stylesheet with the same selectors, so these values win.
+ */
+.str-chat,
+.str-chat__theme-light {
+  --str-chat__font-family: var(--font-sans);
+
+  --str-chat__primary-color: var(--brand-500);
+  --str-chat__active-primary-color: var(--brand-600);
+  --str-chat__on-primary-color: var(--text-inverse);
+  --str-chat__primary-surface-color: var(--brand-100);
+  --str-chat__primary-surface-color-low-emphasis: #f8f3fd;
+  --str-chat__primary-overlay-color: rgba(114, 9, 183, 0.15);
+
+  --str-chat__background-color: var(--surface);
+  --str-chat__secondary-background-color: var(--surface);
+  --str-chat__surface-color: var(--surface-sunken);
+  --str-chat__secondary-surface-color: var(--surface-muted);
+  --str-chat__tertiary-surface-color: var(--border);
+
+  --str-chat__text-color: var(--text);
+  --str-chat__text-low-emphasis-color: var(--text-muted);
+  --str-chat__disabled-color: var(--text-subtle);
+  --str-chat__unread-badge-color: var(--danger);
+
+  --str-chat__border-radius-xs: 6px;
+  --str-chat__border-radius-sm: 10px;
+  --str-chat__border-radius-md: 14px;
+  --str-chat__border-radius-lg: 20px;
+  --str-chat__message-bubble-border-radius: 16px;
+
+  --str-chat__own-message-bubble-color: var(--text-inverse);
+  --str-chat__own-message-bubble-background-color: var(--brand-500);
+}
+
+/* Links inside own (purple) bubbles stay readable */
+.str-chat__message--me .str-chat__message-bubble a {
+  color: var(--text-inverse);
+  text-decoration: underline;
+}
+
+/* Composer: a calm card instead of a hard bar */
+.str-chat__message-input {
+  padding: var(--space-3) var(--space-5) var(--space-4);
+  background: var(--surface);
+}
+
+.str-chat__message-input .str-chat__message-textarea-container {
+  border-color: var(--border-strong);
+  border-radius: var(--radius-lg);
+  transition: border-color var(--duration-fast), box-shadow var(--duration-fast);
+}
+
+.str-chat__message-input .str-chat__message-textarea-container:focus-within {
+  border-color: var(--brand-400);
+  box-shadow: var(--focus-ring);
+}
+
+/* Thread panel separated from the main conversation */
+.str-chat__thread {
+  border-left: 1px solid var(--border);
+}
+
+.str-chat__thread .str-chat__thread-header {
+  height: var(--header-height);
+  border-bottom: 1px solid var(--border);
+}
