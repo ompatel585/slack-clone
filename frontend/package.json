@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@clerk/clerk-react": "^5.53.2",
+    "@stream-io/video-react-sdk": "^1.44.1",
     "axios": "^1.12.2",
     "lucide-react": "^1.61.0",
     "react": "^19.1.1",

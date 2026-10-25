@@ -2,7 +2,7 @@
 
 > **Branch:** `feat/pro-features` (cut from `main` after the Task 2 PR is merged)
 > **Goal:** turn the chat workspace into a production-grade team tool with five new features, one phase per feature, and finish with project documentation.
-> **Status:** 🚧 In progress — Phase 1 ✅ · Phase 2 ✅
+> **Status:** 🚧 In progress — Phase 1 ✅ · Phase 2 ✅ · Phase 3 ✅
 
 ---
 
@@ -38,7 +38,7 @@ Legend: **A** = added, **M** = modified, **D** = deleted.
 |------:|---------|------:|--------|
 | 1 | Feature 1: create, browse & join channels | 10 | ✅ |
 | 2 | Feature 2: direct messages & online presence | 5 | ✅ |
-| 3 | Feature 3: video calls | 7 | ⏳ |
+| 3 | Feature 3: video calls | 7 | ✅ |
 | 4 | Feature 4: members, invites, leave & pinned messages | 8 | ⏳ |
 | 5 | Feature 5: global message search (⌘K) | 5 | ⏳ |
 | 6 | Documentation & release notes | 3 | ⏳ |
@@ -128,7 +128,29 @@ Legend: **A** = added, **M** = modified, **D** = deleted.
 | M | `frontend/src/components/CustomChannelHeader.jsx` |
 | M | `docs/task-3-pro-features/README.md` |
 
-**Phase summary:** _pending_
+**Phase summary:** ✅ Done
+- Dependency: `@stream-io/video-react-sdk@^1.44.1` (React 17–19). It authenticates with the existing `/api/chat/token`, since the token is signed with the same Stream secret, so no backend change was needed.
+- `CallPage` at `/call/:id`:
+  - the call id is validated, and an invalid link gets its own screen;
+  - a StrictMode-safe join and cleanup (`join({ create: true })` → `leave()` + `disconnectUser()`);
+  - a header with a pulsing "Live" dot, participant count and **Copy invite link**;
+  - `SpeakerLayout` with `CallControls`;
+  - leaving, being removed, or the call ending returns to the workspace;
+  - an error screen for a failed join (permissions or network).
+- `call.css` maps the Stream Video theme variables to the brand and adapts the layout for mobile.
+- The header's 📹 **Start a video call** button:
+  - creates a fresh `crypto.randomUUID()` call id;
+  - opens the call in a new tab synchronously, so pop-up blockers allow it, with `opener` cleared;
+  - posts "📹 I've started a video call — join here: …" into the conversation;
+  - shows a toast if the pop-up was blocked.
+- `App.jsx` adds the `/call/:id` route and lazy-loads `HomePage` and `CallPage` behind `Suspense`. The signed-out landing bundle is now 344 kB, and the chat (1.3 MB) and video (264 kB) SDK chunks load only on their routes. Vite still notes that the lazy chat chunk is over 500 kB; that is the `stream-chat-react` library itself, and it no longer delays the first page load.
+- Verified in the browser preview:
+  - the call button opens a `/call/<uuid>` URL and posts the link without errors;
+  - `/call/bad!id` shows "This call link isn't valid";
+  - a valid id with no real Stream credentials shows "Couldn't join the call".
+- **Not covered:** a live two-person call, because it needs real Stream credentials.
+- Lint is clean and the build succeeds.
+- File changes: 2 added, 5 modified (7), exactly as planned.
 
 ---
 

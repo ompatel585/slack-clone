@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useChannelStateContext, useChatContext } from "stream-chat-react";
-import { Hash, Lock, Menu, Users } from "lucide-react";
+import { Hash, Lock, Menu, Users, Video } from "lucide-react";
+import toast from "react-hot-toast";
 
 const relativeTime = new Intl.RelativeTimeFormat(undefined, { numeric: "auto" });
 
@@ -47,6 +48,26 @@ const useDirectMessagePartner = (channel) => {
 const CustomChannelHeader = ({ onMenuClick }) => {
   const { channel, watcher_count: watcherCount = 0 } = useChannelStateContext();
   const partner = useDirectMessagePartner(channel);
+  const [isStartingCall, setIsStartingCall] = useState(false);
+
+  // Every call gets a fresh id so an old link in the history never drops people into a new call
+  const startCall = async () => {
+    setIsStartingCall(true);
+    const callUrl = `${window.location.origin}/call/${crypto.randomUUID()}`;
+    // Open the tab synchronously so pop-up blockers treat it as user-initiated
+    const callWindow = window.open(callUrl, "_blank");
+    if (callWindow) callWindow.opener = null;
+
+    try {
+      await channel.sendMessage({ text: `📹 I've started a video call — join here: ${callUrl}` });
+      if (!callWindow) toast("Pop-up blocked — use the link in the chat to join.", { icon: "📹" });
+    } catch (error) {
+      console.error("Error sharing call link:", error);
+      toast.error("Couldn't post the call link to this conversation.");
+    } finally {
+      setIsStartingCall(false);
+    }
+  };
 
   const name = partner ? partner.name || partner.id : channel.data?.name || channel.id;
   const description = channel.data?.description;
@@ -107,8 +128,19 @@ const CustomChannelHeader = ({ onMenuClick }) => {
             <span className="channel-header__stat-label"> online</span>
           </span>
         )}
-        {/* Channel actions (call, members, invite, pins) are added in later Task 3 phases */}
-        <div className="channel-header__actions" />
+        <div className="channel-header__actions">
+          <button
+            type="button"
+            className="icon-btn"
+            onClick={startCall}
+            disabled={isStartingCall}
+            aria-label="Start a video call"
+            title="Start a video call"
+          >
+            <Video size={18} />
+          </button>
+          {/* Members, invite and pinned-message actions are added in Phase 4 */}
+        </div>
       </div>
     </header>
   );
