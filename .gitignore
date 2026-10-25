@@ -1,2 +1,24 @@
-.env
+# Dependencies
 node_modules
+
+# Environment files (keep the documented templates)
+.env
+.env.*
+!.env.example
+
+# Build output
+dist
+dist-ssr
+.vercel
+
+# Logs
+logs
+*.log
+npm-debug.log*
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea
+.vscode/*
+!.vscode/extensions.json

@@ -2,7 +2,7 @@
 
 > **Branch:** `fix/core-bugs` (cut from `main` after the `docs/project-roadmap` PR is merged)
 > **Goal:** make the existing app run correctly and safely on every OS and on Vercel *before* any UI or feature work starts.
-> **Status:** ⏳ Not started
+> **Status:** ✅ Complete — Phase 1 ✅ · Phase 2 ✅ · Phase 3 ✅
 
 ---
 
@@ -21,9 +21,9 @@ Legend for file changes: **A** = added, **M** = modified, **D** = deleted.
 
 | Phase | Scope | Bugs fixed | Files | Status |
 |------:|-------|-----------:|------:|--------|
-| 1 | Backend configuration, environment & startup | 8 | 8 | ⏳ |
-| 2 | Backend webhooks (Inngest), Stream helpers & API | 10 | 7 | ⏳ |
-| 3 | Frontend routing, lint & repo hygiene | 9 | 9 | ⏳ |
+| 1 | Backend configuration, environment & startup | 8 | 8 | ✅ |
+| 2 | Backend webhooks (Inngest), Stream helpers & API | 10 | 7 | ✅ |
+| 3 | Frontend routing, lint & repo hygiene | 9 | 9 | ✅ |
 
 ---
 
@@ -55,7 +55,18 @@ Legend for file changes: **A** = added, **M** = modified, **D** = deleted.
 
 **Verification:** `node --check` on every backend file. The server must fail with a readable message when required env vars are missing.
 
-**Phase summary:** _pending_
+**Phase summary:** ✅ Done
+- Both npm scripts now use `node --import ./instrument.mjs` (with `nodemon --exec` for dev), so they run the same on Windows, macOS, Linux and CI. Added `engines.node >= 20.6`, which `--import` requires.
+- `env.js` validates the five required variables at import time and also requires `INNGEST_SIGNING_KEY` in production. It defines `CLIENT_URL` (default `http://localhost:5173`) and defaults `NODE_ENV` to `development`.
+- `connectDB` caches its connection promise, reuses an open connection, resets on failure so a retry is possible, and throws instead of calling `process.exit`.
+- Sentry samples 100 % of traces in development and 10 % in production. Local variables and default PII are only sent outside production. The unused `profilesSampleRate` is removed.
+- Deleted the duplicate `user. model.js` and the stray backend `auth.css`. Added a documented `backend/.env.example`.
+- Verified:
+  - `node --check` passes on all backend files.
+  - `npm start` with no `.env` prints `Missing required environment variables: MONGO_URI, CLERK_PUBLISHABLE_KEY, …`.
+  - With `NODE_ENV=production` and no Inngest key, it reports `INNGEST_SIGNING_KEY`.
+  - With an unreachable database, the start script boots and exits with code 1.
+- File changes: 1 added, 5 modified, 2 deleted (8), exactly as planned.
 
 ---
 
@@ -88,7 +99,37 @@ Legend for file changes: **A** = added, **M** = modified, **D** = deleted.
 
 **Verification:** `node --check` on every backend file, plus an import smoke test of the middleware modules.
 
-**Phase summary:** _pending_
+**Phase summary:** ✅ Done
+- `inngest.js` now runs every side effect as a named `step.run`, so a failed step is retried on its own. It:
+  - imports `deleteStreamUser`,
+  - upserts users idempotently,
+  - builds profiles with safe email and name fallbacks,
+  - adds new users to all public channels,
+  - handles `clerk/user.updated`.
+- `stream.js` re-throws errors (a 404 on delete counts as success), pages through every discoverable channel 30 at a time, and exports the shared `streamClient` for later API work.
+- `chat.controller.js` returns 500 instead of `200 { token: null }`. `protectRoute` checks `userId`.
+- `server.js`:
+  - `/debug-sentry` only exists outside production;
+  - new `GET /api/health` reports the database state;
+  - `CLIENT_URL` accepts a comma-separated list of origins;
+  - JSON `notFound` and `errorHandler` sit after the Sentry handler;
+  - a failed DB connection no longer kills the Vercel function.
+- New `error.middleware.js`: 500 responses hide internals, 4xx messages pass through, and the stack is only included outside production.
+- Verified with a live HTTP smoke test of the real app:
+
+  | Request | Result |
+  |---------|--------|
+  | `GET /api/health` | 200 |
+  | `GET /debug-sentry` in production | 404 JSON |
+  | Unknown route | 404 JSON |
+  | `GET /api/chat/token` without a session | 401 |
+  | Allowed origin | `Access-Control-Allow-Origin` echoed |
+  | Disallowed origin | no CORS header |
+  | Bad Inngest signature | 401 |
+  | Thrown error | `500 {"message":"Internal server error"}` |
+  | Malformed JSON body | 400 with the parse message |
+
+- File changes: 1 added, 6 modified (7), exactly as planned.
 
 ---
 
@@ -97,7 +138,7 @@ Legend for file changes: **A** = added, **M** = modified, **D** = deleted.
 | ID | Bug | Impact | Fix |
 |----|-----|--------|-----|
 | F1 | Two `<Routes>` blocks inside `<SignedIn>`: the second sends `*` to `/auth`, the first sends `/auth` back to `/` | **Infinite redirect loop** for every signed-in user | One route table per auth state |
-| F2 | Unused imports (`SignInButton`, `UserButton`) in `App.jsx` | `npm run lint` fails | Remove them |
+| F2 | Unused imports (`SignInButton`, `UserButton`) in `App.jsx` | Dead code that bloats the module (the lint rule's `^[A-Z_]` ignore pattern hides it, so lint never flagged it) | Remove them |
 | F3 | Stray `{" "}` text nodes inside `<Routes>` | Invalid children, noisy markup | Remove them |
 | F4 | Unused `React` import in `HomePage.jsx` | Dead code | Remove it |
 | F5 | `<title>frontend</title>` and the default Vite favicon | Unprofessional browser tab | Brand title and favicon |
@@ -122,7 +163,15 @@ Legend for file changes: **A** = added, **M** = modified, **D** = deleted.
 
 **Verification:** `npm run lint` and `npm run build` in `frontend/` both pass.
 
-**Phase summary:** _pending_
+**Phase summary:** ✅ Done
+- `App.jsx` has one route table per auth state. Signed-in users get `/`, and everything else redirects to `/`. Signed-out users get `/auth`, and everything else redirects to `/auth`. This removes the `/` ↔ `/auth` redirect loop. The dead imports and stray `{" "}` text nodes are gone.
+- `HomePage.jsx` drops the unused `React` import. `main.jsx` gives an actionable missing-key error and sets `afterSignOutUrl="/auth"`.
+- `index.html` has the title "Slap — Where Work Happens" and the brand logo as favicon. `index.css` gets a minimal reset (box-sizing, zero body margin, a dark base background matching the auth page).
+- Added `frontend/.env.example` (Clerk key, API URL, Stream key) and `frontend/vercel.json` (SPA rewrite, so deep links stop returning 404 on refresh).
+- The root `.gitignore` now ignores `.env.*` (keeping `.env.example`), `dist`, `.vercel`, logs and OS/editor files. Checked with `git check-ignore`.
+- Verified: `npm run lint` passes with 0 problems, and `npm run build` succeeds (316 kB JS, 97 kB gzip). The routing fix was checked by reading the route tables. It couldn't be exercised in a browser here because no Clerk key is configured.
+- Correction to the plan: the original `App.jsx` did *not* fail lint (see F2). The fix stands; only the impact description changed.
+- File changes: 2 added, 7 modified (9), exactly as planned.
 
 ---
 
