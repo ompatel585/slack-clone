@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { ChannelList, useChatContext } from "stream-chat-react";
 import { UserButton, useUser } from "@clerk/clerk-react";
-import { Compass, Hash, MessageCircle, Plus, X } from "lucide-react";
+import { Compass, Hash, MessageCircle, Plus, Search, X } from "lucide-react";
 import CustomChannelPreview from "./CustomChannelPreview";
 import CreateChannelModal from "./CreateChannelModal";
 import BrowseChannelsModal from "./BrowseChannelsModal";
@@ -26,7 +26,9 @@ const ChannelListSkeleton = () => (
   </div>
 );
 
-const Sidebar = ({ isOpen = false, onClose }) => {
+const IS_MAC = typeof navigator !== "undefined" && /Mac|iPhone|iPad/.test(navigator.userAgent);
+
+const Sidebar = ({ isOpen = false, onClose, onOpenSearch }) => {
   const { client, channel: activeChannel } = useChatContext();
   const { user } = useUser();
   const [openModal, setOpenModal] = useState(null); // "create" | "browse" | null
@@ -65,6 +67,18 @@ const Sidebar = ({ isOpen = false, onClose }) => {
           </button>
         </div>
       </header>
+
+      {onOpenSearch && (
+        <div className="sidebar__search-wrap">
+          <button type="button" className="sidebar__search" onClick={onOpenSearch}>
+            <Search size={15} aria-hidden="true" />
+            <span>Search messages</span>
+            <kbd className="sidebar__kbd" aria-label={IS_MAC ? "Command K" : "Control K"}>
+              {IS_MAC ? "⌘K" : "Ctrl K"}
+            </kbd>
+          </button>
+        </div>
+      )}
 
       <nav className="sidebar__body" aria-label="Channels">
         <div className="sidebar__section-header">

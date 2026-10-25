@@ -2,7 +2,7 @@
 
 > **Branch:** `feat/pro-features` (cut from `main` after the Task 2 PR is merged)
 > **Goal:** turn the chat workspace into a production-grade team tool with five new features, one phase per feature, and finish with project documentation.
-> **Status:** 🚧 In progress — Phase 1 ✅ · Phase 2 ✅ · Phase 3 ✅ · Phase 4 ✅
+> **Status:** 🚧 In progress — Phase 1 ✅ · Phase 2 ✅ · Phase 3 ✅ · Phase 4 ✅ · Phase 5 ✅
 
 ---
 
@@ -40,7 +40,7 @@ Legend: **A** = added, **M** = modified, **D** = deleted.
 | 2 | Feature 2: direct messages & online presence | 5 | ✅ |
 | 3 | Feature 3: video calls | 7 | ✅ |
 | 4 | Feature 4: members, invites, leave & pinned messages | 9 | ✅ |
-| 5 | Feature 5: global message search (⌘K) | 5 | ⏳ |
+| 5 | Feature 5: global message search (⌘K) | 5 | ✅ |
 | 6 | Documentation & release notes | 3 | ⏳ |
 
 ---
@@ -211,7 +211,20 @@ Legend: **A** = added, **M** = modified, **D** = deleted.
 | M | `frontend/src/styles/modal.css` |
 | M | `docs/task-3-pro-features/README.md` |
 
-**Phase summary:** _pending_
+**Phase summary:** ✅ Done
+- `SearchModal`:
+  - a 300 ms debounced `client.search` across every channel and DM the user belongs to (minimum 2 characters, 20 newest results);
+  - case-insensitive `<mark>` highlighting with regex-escaped input;
+  - each result shows the channel (or "Direct message"), author and time;
+  - idle, searching, empty and error states;
+  - a proper combobox/listbox (`aria-activedescendant`, `aria-selected`) with ↑ ↓ (wrapping), Enter, Esc and hover.
+- `HomePage`:
+  - a global ⌘K / Ctrl+K shortcut;
+  - `SearchDialog` opens the result's channel;
+  - `JumpToPendingMessage` (inside `<Channel>`, where `jumpToMessage` exists) scrolls to and highlights the message once that channel is mounted, and logs a failed jump instead of throwing.
+- `Sidebar` gets a "Search messages" trigger with a platform-aware `⌘K` / `Ctrl K` hint. Styles are in `modal.css`.
+- Verified in the browser preview: Ctrl+K opens the dialog with the input focused; "the" returns 3 highlighted results and ArrowDown moves the active option; searching "lunch" and pressing Enter switches to `#random`; searching "release" jumps to and highlights the matching message in `#general`. Lint is clean and the build succeeds.
+- File changes: 1 added, 4 modified (5), exactly as planned.
 
 ---
 
